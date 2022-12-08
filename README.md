@@ -1,0 +1,2 @@
+# MOGONET
+Graph Convolutional Network
