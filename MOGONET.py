@@ -19,11 +19,11 @@ import matplotlib.pyplot as plt
 #####################################
 #           Load Data               #
 #####################################
-
-rnaseq = pd.read_csv("~/multiomics/Multiomics/Input/DataRnaseq", sep=" ")
-traitData = pd.read_csv("~/multiomics/Multiomics/Input/DataOutcome", sep=" ")
-DataExome=pd.read_csv("/home/ldap/ltoure/multiomics/Multiomics/Input/DataExome", sep=" ")
-TestIndex100 = pd.read_csv("~/multiomics/Data4Lamine/TestIndex100Splits", sep=" ")
+# The model takes 3 types omics data. So here i duplicate one the inputs.
+rnaseq = pd.read_csv("path", sep=" ")
+traitData = pd.read_csv("path", sep=" ")
+DataExome=pd.read_csv("path", sep=" ")
+TestIndex100 = pd.read_csv("path", sep=" ")
 
 #############################################
 #          Data transformation              #
@@ -33,8 +33,6 @@ TestIndex100 = pd.read_csv("~/multiomics/Data4Lamine/TestIndex100Splits", sep=" 
 test_i = TestIndex100
 test_i = test_i - 1
 
- #with open('xgboost_opt_params', 'rb') as f:
-  #  params = pickle.load(f)
 X= rnaseq
 y= DataExome
 labels=traitData
@@ -52,7 +50,6 @@ if data_folder == 'ROSMAP':
 if data_folder == 'BRCA':
         num_class = 5
         
-#all_imp = {} 
 all_auc = []
 all_acc = []
 all_bacc = []
@@ -78,20 +75,20 @@ for i in range(test_i.shape[1]):
     feature_name_X_tr=X_tr.columns
     feature_name_y=y_tr.columns
 
-    X_tr.to_csv("/home/ldap/ltoure/MOGONET/ROSMAP/1_tr.csv", header=False, index=False)
-    X_te.to_csv("/home/ldap/ltoure/MOGONET/ROSMAP/1_te.csv", header=False, index=False)
-    y_tr.to_csv("/home/ldap/ltoure/MOGONET/ROSMAP/2_tr.csv", header=False, index=False)
-    y_te.to_csv("/home/ldap/ltoure/MOGONET/ROSMAP/2_te.csv", header=False, index=False)
-    X_tr.to_csv("/home/ldap/ltoure/MOGONET/ROSMAP/3_tr.csv", header=False, index=False)
-    X_te.to_csv("/home/ldap/ltoure/MOGONET/ROSMAP/3_te.csv", header=False, index=False)
-    labels_tr.to_csv("/home/ldap/ltoure/MOGONET/ROSMAP/labels_tr.csv", header=False, index=False)
-    labels_te.to_csv("/home/ldap/ltoure/MOGONET/ROSMAP/labels_te.csv", header=False, index=False)
+    X_tr.to_csv("~/MOGONET/ROSMAP/1_tr.csv", header=False, index=False)
+    X_te.to_csv("~/MOGONET/ROSMAP/1_te.csv", header=False, index=False)
+    y_tr.to_csv("~/MOGONET/ROSMAP/2_tr.csv", header=False, index=False)
+    y_te.to_csv("~/MOGONET/ROSMAP/2_te.csv", header=False, index=False)
+    X_tr.to_csv("~/MOGONET/ROSMAP/3_tr.csv", header=False, index=False)
+    X_te.to_csv("~/MOGONET/ROSMAP/3_te.csv", header=False, index=False)
+    labels_tr.to_csv("~/MOGONET/ROSMAP/labels_tr.csv", header=False, index=False)
+    labels_te.to_csv("~/MOGONET/ROSMAP/labels_te.csv", header=False, index=False)
     feature_name_X_tr=pd.DataFrame(feature_name_X_tr) 
-    feature_name_X_tr.to_csv("/home/ldap/ltoure/MOGONET/ROSMAP/1_featname.csv", header=False, index=False)
+    feature_name_X_tr.to_csv("~/MOGONET/ROSMAP/1_featname.csv", header=False, index=False)
     feature_name_y=pd.DataFrame(feature_name_y) 
-    feature_name_y.to_csv("/home/ldap/ltoure/MOGONET/ROSMAP/2_featname.csv", header=False, index=False)
+    feature_name_y.to_csv("~/MOGONET/ROSMAP/2_featname.csv", header=False, index=False)
     feature_name_X_tr_tr=pd.DataFrame(feature_name_X_tr) 
-    feature_name_X_tr.to_csv("/home/ldap/ltoure/MOGONET/ROSMAP/3_featname.csv", header=False, index=False)
+    feature_name_X_tr.to_csv("~/MOGONET/ROSMAP/3_featname.csv", header=False, index=False)
     
     #####################################  
     #           Model train              #
@@ -202,7 +199,7 @@ feat_imp=sns.barplot(data=df_featimp_top, x="imp", y="feat_name")
 fig = feat_imp.get_figure()
 fig.savefig('Feature_imp_MOGONET.png')
 
-df_featimp_top.to_csv("/home/ldap/ltoure/MOGONET/Featimp.csv")
+df_featimp_top.to_csv("~/MOGONET/Featimp.csv")
 
 
 hist_auc = sns.displot(all_auc)
