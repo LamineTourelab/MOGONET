@@ -6,21 +6,27 @@ Created on Thu Nov 17 09:39:37 2022
 @author: ltoure
 """
 ## This model is the summary of the differents modules of origoinal MOGONET model from the model training to features importants and evaluation of the model. 
+
+import os
 import pandas as pd 
 import numpy as np 
-from sklearn.metrics import log_loss, confusion_matrix, accuracy_score, balanced_accuracy_score, f1_score, precision_score, recall_score
+import torch
+import torch.nn.functional as F
+from models import init_model_dict, init_optim
+from utils import one_hot_tensor, cal_sample_weight, gen_adj_mat_tensor, gen_test_adj_mat_tensor, cal_adj_mat_parameter
+from sklearn.metrics import log_loss, confusion_matrix, accuracy_score, balanced_accuracy_score, f1_score, precision_score, recall_score, roc_curve, auc
 from matplotlib.pyplot import figure
 import seaborn as sns
 from sklearn.model_selection import train_test_split
 import random
 import pickle
-from sklearn.metrics import roc_curve, auc
 import csv
 import matplotlib.pyplot as plt
+
 #####################################
 #           Load Data               #
 #####################################
-# The model takes 3 types omics data. So here i duplicate one the inputs.
+# The model takes 3 types omics data. So father I duplicate one the inputs.
 omics1 = pd.read_csv("path", sep=" ")
 label = pd.read_csv("path", sep=" ")
 omics2 = pd.read_csv("path", sep=" ")
@@ -242,6 +248,7 @@ for key in mean_perf.keys():
    mean_perf_out.write(key + " " + str(mean_perf[key]) + "\n")
 mean_perf_out.close() 
 
+# The end 
     
            
     
