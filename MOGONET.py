@@ -5,6 +5,7 @@ Created on Thu Nov 17 09:39:37 2022
 
 @author: ltoure
 """
+## This model is the summary of the differents modules of origoinal MOGONET model from the model training to features importants and evaluation of the model. 
 import pandas as pd 
 import numpy as np 
 from sklearn.metrics import log_loss, confusion_matrix, accuracy_score, balanced_accuracy_score, f1_score, precision_score, recall_score
@@ -20,10 +21,10 @@ import matplotlib.pyplot as plt
 #           Load Data               #
 #####################################
 # The model takes 3 types omics data. So here i duplicate one the inputs.
-rnaseq = pd.read_csv("path", sep=" ")
-traitData = pd.read_csv("path", sep=" ")
-DataExome=pd.read_csv("path", sep=" ")
-TestIndex100 = pd.read_csv("path", sep=" ")
+omics1 = pd.read_csv("path", sep=" ")
+label = pd.read_csv("path", sep=" ")
+omics2 = pd.read_csv("path", sep=" ")
+TestIndex100 = pd.read_csv("path", sep=" ") # To allow training in split data 100 times.
 
 #############################################
 #          Data transformation              #
@@ -33,8 +34,8 @@ TestIndex100 = pd.read_csv("path", sep=" ")
 test_i = TestIndex100
 test_i = test_i - 1
 
-X= rnaseq
-y= DataExome
+X = omics1
+y = omics2
 labels=traitData
 
 data_folder = 'ROSMAP'
@@ -46,9 +47,9 @@ lr_e = 5e-4
 lr_c = 1e-3
     
 if data_folder == 'ROSMAP':
-        num_class = 2
+        num_class = 2 # Binary classification
 if data_folder == 'BRCA':
-        num_class = 5
+        num_class = 5 # Multiclass classification
         
 all_auc = []
 all_acc = []
@@ -67,10 +68,10 @@ for i in range(test_i.shape[1]):
     labels_tr = labels.iloc[np.setdiff1d(np.arange(y.shape[0]), test_i.iloc[:,i]),:]
     labels_te = labels.iloc[test_i.iloc[:,i],:]
 
-    labels_tr = labels_tr.replace("R",1.0000+00)
-    labels_tr = labels_tr.replace("NR",0.0000+00)
-    labels_te = labels_te.replace("NR",0.0000+00)
-    labels_te = labels_te.replace("R",1.0000+00)
+    labels_tr = labels_tr.replace("labels1",1.0000+00)
+    labels_tr = labels_tr.replace("labels2",0.0000+00)
+    labels_te = labels_te.replace("labels1",0.0000+00)
+    labels_te = labels_te.replace("labels2",1.0000+00)
 
     feature_name_X_tr=X_tr.columns
     feature_name_y=y_tr.columns
@@ -79,6 +80,7 @@ for i in range(test_i.shape[1]):
     X_te.to_csv("~/MOGONET/ROSMAP/1_te.csv", header=False, index=False)
     y_tr.to_csv("~/MOGONET/ROSMAP/2_tr.csv", header=False, index=False)
     y_te.to_csv("~/MOGONET/ROSMAP/2_te.csv", header=False, index=False)
+    # While I have only two OMICs data, I duplicate the type 1.
     X_tr.to_csv("~/MOGONET/ROSMAP/3_tr.csv", header=False, index=False)
     X_te.to_csv("~/MOGONET/ROSMAP/3_te.csv", header=False, index=False)
     labels_tr.to_csv("~/MOGONET/ROSMAP/labels_tr.csv", header=False, index=False)
