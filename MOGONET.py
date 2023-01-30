@@ -18,7 +18,6 @@ from train_test import train_test, prepare_trte_data, train_epoch, test_epoch
 from sklearn.metrics import log_loss, confusion_matrix, accuracy_score, balanced_accuracy_score, f1_score, precision_score, recall_score, roc_curve, auc
 from matplotlib.pyplot import figure
 import seaborn as sns
-from sklearn.model_selection import train_test_split
 import random
 import pickle
 import csv
