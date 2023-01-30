@@ -45,8 +45,9 @@ X = omics1
 y = omics2
 labels=traitData
 
-data_folder = 'ROSMAP'
-view_list = [1,2,3]
+# While I have only two OMICs data, I will use view_list a list of 2. In the original paper, they said that the model was best when using 3 types of Omics or plus. 
+# you have to edit according to your data.
+view_list = [1,2] ## For 3 types of omics you got : view_list = [1,2,3] and so on.
 num_epoch_pretrain = 1000
 num_epoch = 1500
 lr_e_pretrain = 1e-3
@@ -82,22 +83,19 @@ for i in range(test_i.shape[1]):
 
     feature_name_X_tr=X_tr.columns
     feature_name_y=y_tr.columns
-
+# I wil create for each split data and save the data in data folder. This for not modified all the path in the model :). You can change the folder as you want.
     X_tr.to_csv("~/MOGONET/ROSMAP/1_tr.csv", header=False, index=False)
     X_te.to_csv("~/MOGONET/ROSMAP/1_te.csv", header=False, index=False)
     y_tr.to_csv("~/MOGONET/ROSMAP/2_tr.csv", header=False, index=False)
     y_te.to_csv("~/MOGONET/ROSMAP/2_te.csv", header=False, index=False)
-    # While I have only two OMICs data, I duplicate the type 1.
-    X_tr.to_csv("~/MOGONET/ROSMAP/3_tr.csv", header=False, index=False)
-    X_te.to_csv("~/MOGONET/ROSMAP/3_te.csv", header=False, index=False)
+    
     labels_tr.to_csv("~/MOGONET/ROSMAP/labels_tr.csv", header=False, index=False)
     labels_te.to_csv("~/MOGONET/ROSMAP/labels_te.csv", header=False, index=False)
+    
     feature_name_X_tr=pd.DataFrame(feature_name_X_tr) 
     feature_name_X_tr.to_csv("~/MOGONET/ROSMAP/1_featname.csv", header=False, index=False)
     feature_name_y=pd.DataFrame(feature_name_y) 
     feature_name_y.to_csv("~/MOGONET/ROSMAP/2_featname.csv", header=False, index=False)
-    feature_name_X_tr_tr=pd.DataFrame(feature_name_X_tr) 
-    feature_name_X_tr.to_csv("~/MOGONET/ROSMAP/3_featname.csv", header=False, index=False)
     
     #####################################  
     #           Model train              #
@@ -254,23 +252,3 @@ mean_perf_out.close()
          
     
     
- 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
