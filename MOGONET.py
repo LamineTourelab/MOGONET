@@ -27,7 +27,7 @@ import matplotlib.pyplot as plt
 #####################################
 #           Load Data               #
 #####################################
-# The model takes 3 types omics data. So father I duplicate one the inputs.
+
 omics1 = pd.read_csv("path", sep=" ")
 label = pd.read_csv("path", sep=" ")
 omics2 = pd.read_csv("path", sep=" ")
@@ -43,7 +43,7 @@ test_i = test_i - 1
 
 X = omics1
 y = omics2
-labels=traitData
+labels=label
 
 # While I have only two OMICs data, I will use view_list a list of 2. In the original paper, they said that the model was best when using 3 types of Omics or plus. 
 # you have to edit according to your data.
