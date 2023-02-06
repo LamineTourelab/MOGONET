@@ -43,13 +43,14 @@ y = omics2
 labels = outcomes
 
 data_folder = 'ROSMAP'
-view_list = [1,2]
+view_list = [1,2]  ## The parameter for the number of omics you have. Here I using 2 types of omics. for 3 types : view_list = [1,2,3] and so on.
 num_epoch_pretrain = 2500
 num_epoch = 1
 lr_e_pretrain = 1e-3
 lr_e = 5e-4
 lr_c = 1e-3
-    
+
+# Choose a data depending of the type of classifiation task. ROSMAP for binary classification and BRCA for multi-class classification.
 if data_folder == 'ROSMAP':
         num_class = 2
 if data_folder == 'BRCA':
@@ -64,7 +65,8 @@ all_precision = []
 all_recall = []
 all_se = []
 all_sp = []
-
+# I train the in split data. I choose 100 splis previous done based on the response data. 
+#If you want to train the model in more than 1 epoch and you don't have a GPU (It's not a god idea my dear).
 for i in range(test_i.shape[1]):
     X_tr = X.iloc[np.setdiff1d(np.arange(X.shape[0]), test_i.iloc[:,i]),:]
     X_te = X.iloc[test_i.iloc[:,i],:]
@@ -290,22 +292,5 @@ mean_perf_out.close()
     
     
  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
