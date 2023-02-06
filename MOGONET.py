@@ -24,10 +24,10 @@ cuda = True if torch.cuda.is_available() else False
 #           Load Data               #
 #####################################
 
-rnaseq = pd.read_csv("/home/ldap/ltoure/multiomics/Multiomics/Input/Data/Rnaseq", sep=",", index_col=0)
-traitData = pd.read_csv("//home/ldap/ltoure/multiomics/Multiomics/Input/Data/Response", index_col=0)
-DataExome= pd.read_csv("/home/ldap/ltoure/multiomics/Multiomics/Input/Data/Exome", sep=",", index_col=0)
-TestIndex100 = pd.read_csv("/home/ldap/ltoure/multiomics/Multiomics/Input/TestIndex100Split", sep=" ")
+rnaseq = pd.read_csv("path", sep=",", index_col=0)
+traitData = pd.read_csv("path", index_col=0)
+DataExome= pd.read_csv("path", sep=",", index_col=0)
+TestIndex100 = pd.read_csv("path", sep=" ")
 
 #############################################
 #          Data transformation              #
@@ -37,15 +37,14 @@ TestIndex100 = pd.read_csv("/home/ldap/ltoure/multiomics/Multiomics/Input/TestIn
 test_i = TestIndex100
 test_i = test_i - 1
 
- #with open('xgboost_opt_params', 'rb') as f:
-  #  params = pickle.load(f)
+
 X= rnaseq
 y= DataExome
 labels=traitData
 
 data_folder = 'ROSMAP'
 view_list = [1,2]
-num_epoch_pretrain = 500
+num_epoch_pretrain = 2500
 num_epoch = 1
 lr_e_pretrain = 1e-3
 lr_e = 5e-4
@@ -74,28 +73,26 @@ for i in range(test_i.shape[1]):
     labels_tr = labels.iloc[np.setdiff1d(np.arange(y.shape[0]), test_i.iloc[:,i]),:]
     labels_te = labels.iloc[test_i.iloc[:,i],:]
 
-    labels_tr = labels_tr.replace("R",1.0000+00)
-    labels_tr = labels_tr.replace("NR",0.0000+00)
-    labels_te = labels_te.replace("NR",0.0000+00)
-    labels_te = labels_te.replace("R",1.0000+00)
+    labels_tr = labels_tr.replace("X1",1.0000+00)
+    labels_tr = labels_tr.replace("X2",0.0000+00)
+    labels_te = labels_te.replace("X2",0.0000+00)
+    labels_te = labels_te.replace("X1",1.0000+00)
 
     feature_name_X_tr=X_tr.columns
     feature_name_y=y_tr.columns
 
-    X_tr.to_csv("/home/ldap/ltoure/MOGONET/ROSMAP/1_tr.csv", header=False, index=False)
-    X_te.to_csv("/home/ldap/ltoure/MOGONET/ROSMAP/1_te.csv", header=False, index=False)
-    y_tr.to_csv("/home/ldap/ltoure/MOGONET/ROSMAP/2_tr.csv", header=False, index=False)
-    y_te.to_csv("/home/ldap/ltoure/MOGONET/ROSMAP/2_te.csv", header=False, index=False)
-  #  X_tr.to_csv("/home/ldap/ltoure/MOGONET/ROSMAP/3_tr.csv", header=False, index=False)
-   # X_te.to_csv("/home/ldap/ltoure/MOGONET/ROSMAP/3_te.csv", header=False, index=False)
-    labels_tr.to_csv("/home/ldap/ltoure/MOGONET/ROSMAP/labels_tr.csv", header=False, index=False)
-    labels_te.to_csv("/home/ldap/ltoure/MOGONET/ROSMAP/labels_te.csv", header=False, index=False)
+    X_tr.to_csv("~/MOGONET/ROSMAP/1_tr.csv", header=False, index=False)
+    X_te.to_csv("~/MOGONET/ROSMAP/1_te.csv", header=False, index=False)
+    y_tr.to_csv("~MOGONET/ROSMAP/2_tr.csv", header=False, index=False)
+    y_te.to_csv("~/MOGONET/ROSMAP/2_te.csv", header=False, index=False)
+  
+    labels_tr.to_csv("~/MOGONET/ROSMAP/labels_tr.csv", header=False, index=False)
+    labels_te.to_csv("~/MOGONET/ROSMAP/labels_te.csv", header=False, index=False)
     feature_name_X_tr=pd.DataFrame(feature_name_X_tr) 
-    feature_name_X_tr.to_csv("/home/ldap/ltoure/MOGONET/ROSMAP/1_featname.csv", header=False, index=False)
+    feature_name_X_tr.to_csv("~/MOGONET/ROSMAP/1_featname.csv", header=False, index=False)
     feature_name_y=pd.DataFrame(feature_name_y) 
-    feature_name_y.to_csv("/home/ldap/ltoure/MOGONET/ROSMAP/2_featname.csv", header=False, index=False)
-   # feature_name_X_tr_tr=pd.DataFrame(feature_name_X_tr) 
-    #feature_name_X_tr.to_csv("/home/ldap/ltoure/MOGONET/ROSMAP/3_featname.csv", header=False, index=False)
+    feature_name_y.to_csv("~/MOGONET/ROSMAP/2_featname.csv", header=False, index=False)
+   
     
     #####################################  
     #           Model train              #
