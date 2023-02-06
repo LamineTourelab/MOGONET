@@ -5,32 +5,29 @@ Created on Thu Nov 17 09:39:37 2022
 
 @author: ltoure
 """
-## This model is the summary of the differents modules of origoinal MOGONET model from the model training to features importants and evaluation of the model. 
-
 import os
 import pandas as pd 
 import numpy as np 
 import torch
 import torch.nn.functional as F
 from models import init_model_dict, init_optim
-from utils import one_hot_tensor, cal_sample_weight, gen_adj_mat_tensor, gen_test_adj_mat_tensor, cal_adj_mat_parameter,  gen_trte_adj_mat
-from train_test import train_test, prepare_trte_data, train_epoch, test_epoch
-from sklearn.metrics import log_loss, confusion_matrix, accuracy_score, balanced_accuracy_score, f1_score, precision_score, recall_score, roc_curve, auc
-from matplotlib.pyplot import figure
+from utils import one_hot_tensor, cal_sample_weight, gen_adj_mat_tensor, gen_test_adj_mat_tensor, cal_adj_mat_parameter
+from train_test import train_test, prepare_trte_data, train_epoch, test_epoch, gen_trte_adj_mat
+from sklearn.metrics import confusion_matrix, accuracy_score, balanced_accuracy_score, f1_score, precision_score, recall_score, roc_auc_score
 import seaborn as sns
-import random
-import pickle
-import csv
-import matplotlib.pyplot as plt
+import copy
+
+#### Define device ###
+cuda = True if torch.cuda.is_available() else False
 
 #####################################
 #           Load Data               #
 #####################################
 
-omics1 = pd.read_csv("path", sep=" ")
-label = pd.read_csv("path", sep=" ")
-omics2 = pd.read_csv("path", sep=" ")
-TestIndex100 = pd.read_csv("path", sep=" ") # To allow training in split data 100 times.
+rnaseq = pd.read_csv("/home/ldap/ltoure/multiomics/Multiomics/Input/Data/Rnaseq", sep=",", index_col=0)
+traitData = pd.read_csv("//home/ldap/ltoure/multiomics/Multiomics/Input/Data/Response", index_col=0)
+DataExome= pd.read_csv("/home/ldap/ltoure/multiomics/Multiomics/Input/Data/Exome", sep=",", index_col=0)
+TestIndex100 = pd.read_csv("/home/ldap/ltoure/multiomics/Multiomics/Input/TestIndex100Split", sep=" ")
 
 #############################################
 #          Data transformation              #
@@ -40,24 +37,26 @@ TestIndex100 = pd.read_csv("path", sep=" ") # To allow training in split data 10
 test_i = TestIndex100
 test_i = test_i - 1
 
-X = omics1
-y = omics2
-labels=label
+ #with open('xgboost_opt_params', 'rb') as f:
+  #  params = pickle.load(f)
+X= rnaseq
+y= DataExome
+labels=traitData
 
-# While I have only two OMICs data, I will use view_list a list of 2. In the original paper, they said that the model was best when using 3 types of Omics or plus. 
-# you have to edit according to your data.
-view_list = [1,2] ## For 3 types of omics you got : view_list = [1,2,3] and so on.
-num_epoch_pretrain = 1000
-num_epoch = 1500
+data_folder = 'ROSMAP'
+view_list = [1,2]
+num_epoch_pretrain = 500
+num_epoch = 1
 lr_e_pretrain = 1e-3
 lr_e = 5e-4
 lr_c = 1e-3
     
 if data_folder == 'ROSMAP':
-        num_class = 2 # Binary classification
+        num_class = 2
 if data_folder == 'BRCA':
-        num_class = 5 # Multiclass classification
+        num_class = 5
         
+#all_imp = {} 
 all_auc = []
 all_acc = []
 all_bacc = []
@@ -75,26 +74,28 @@ for i in range(test_i.shape[1]):
     labels_tr = labels.iloc[np.setdiff1d(np.arange(y.shape[0]), test_i.iloc[:,i]),:]
     labels_te = labels.iloc[test_i.iloc[:,i],:]
 
-    labels_tr = labels_tr.replace("labels1",1.0000+00)
-    labels_tr = labels_tr.replace("labels2",0.0000+00)
-    labels_te = labels_te.replace("labels1",0.0000+00)
-    labels_te = labels_te.replace("labels2",1.0000+00)
+    labels_tr = labels_tr.replace("R",1.0000+00)
+    labels_tr = labels_tr.replace("NR",0.0000+00)
+    labels_te = labels_te.replace("NR",0.0000+00)
+    labels_te = labels_te.replace("R",1.0000+00)
 
     feature_name_X_tr=X_tr.columns
     feature_name_y=y_tr.columns
-# I wil create for each split data and save the data in data folder. This for not modified all the path in the model :). You can change the folder as you want.
-    X_tr.to_csv("~/MOGONET/ROSMAP/1_tr.csv", header=False, index=False)
-    X_te.to_csv("~/MOGONET/ROSMAP/1_te.csv", header=False, index=False)
-    y_tr.to_csv("~/MOGONET/ROSMAP/2_tr.csv", header=False, index=False)
-    y_te.to_csv("~/MOGONET/ROSMAP/2_te.csv", header=False, index=False)
-    
-    labels_tr.to_csv("~/MOGONET/ROSMAP/labels_tr.csv", header=False, index=False)
-    labels_te.to_csv("~/MOGONET/ROSMAP/labels_te.csv", header=False, index=False)
-    
+
+    X_tr.to_csv("/home/ldap/ltoure/MOGONET/ROSMAP/1_tr.csv", header=False, index=False)
+    X_te.to_csv("/home/ldap/ltoure/MOGONET/ROSMAP/1_te.csv", header=False, index=False)
+    y_tr.to_csv("/home/ldap/ltoure/MOGONET/ROSMAP/2_tr.csv", header=False, index=False)
+    y_te.to_csv("/home/ldap/ltoure/MOGONET/ROSMAP/2_te.csv", header=False, index=False)
+  #  X_tr.to_csv("/home/ldap/ltoure/MOGONET/ROSMAP/3_tr.csv", header=False, index=False)
+   # X_te.to_csv("/home/ldap/ltoure/MOGONET/ROSMAP/3_te.csv", header=False, index=False)
+    labels_tr.to_csv("/home/ldap/ltoure/MOGONET/ROSMAP/labels_tr.csv", header=False, index=False)
+    labels_te.to_csv("/home/ldap/ltoure/MOGONET/ROSMAP/labels_te.csv", header=False, index=False)
     feature_name_X_tr=pd.DataFrame(feature_name_X_tr) 
-    feature_name_X_tr.to_csv("~/MOGONET/ROSMAP/1_featname.csv", header=False, index=False)
+    feature_name_X_tr.to_csv("/home/ldap/ltoure/MOGONET/ROSMAP/1_featname.csv", header=False, index=False)
     feature_name_y=pd.DataFrame(feature_name_y) 
-    feature_name_y.to_csv("~/MOGONET/ROSMAP/2_featname.csv", header=False, index=False)
+    feature_name_y.to_csv("/home/ldap/ltoure/MOGONET/ROSMAP/2_featname.csv", header=False, index=False)
+   # feature_name_X_tr_tr=pd.DataFrame(feature_name_X_tr) 
+    #feature_name_X_tr.to_csv("/home/ldap/ltoure/MOGONET/ROSMAP/3_featname.csv", header=False, index=False)
     
     #####################################  
     #           Model train              #
@@ -130,6 +131,7 @@ for i in range(test_i.shape[1]):
     for epoch in range(num_epoch_pretrain):
         train_epoch(data_tr_list, adj_tr_list, labels_tr_tensor, 
                     onehot_labels_tr_tensor, sample_weight_tr, model_dict, optim_dict, train_VCDN=False)
+       # print("\nPretrain GCNs: Epoch {:d}".format(epoch))
     print("\nTraining...")
     optim_dict = init_optim(num_view, model_dict, lr_e, lr_c)
     for epoch in range(num_epoch+1):
@@ -144,7 +146,7 @@ for i in range(test_i.shape[1]):
                 print("Test AUC: {:.3f}".format(roc_auc_score(labels_trte[trte_idx["te"]], te_prob[:,1])))
                 
                 te_prob = test_epoch(data_trte_list, adj_te_list, trte_idx["te"], model_dict)
-                auc=roc_auc_score(labels_trte[trte_idx["te"]], te_prob[:,1])
+                auc = roc_auc_score(labels_trte[trte_idx["te"]], te_prob[:,1])
                 f1 = f1_score(labels_trte[trte_idx["te"]], te_prob.argmax(1))
                 acc = accuracy_score(labels_trte[trte_idx["te"]], te_prob.argmax(1))
                 bacc = balanced_accuracy_score(labels_trte[trte_idx["te"]], te_prob.argmax(1))
@@ -171,31 +173,71 @@ for i in range(test_i.shape[1]):
 #####################################
 #        Feature Importance         #
 #####################################
+
+            data_tr_list, data_trte_list, trte_idx, labels_trte = prepare_trte_data(data_folder, view_list)
+            adj_tr_list, adj_te_list = gen_trte_adj_mat(data_tr_list, data_trte_list, trte_idx, adj_parameter)
+            featname_list = []
+            for v in view_list:
+                df = pd.read_csv(os.path.join(data_folder, str(v)+"_featname.csv"), header=None)
+                featname_list.append(df.values.flatten())
             
-    featname_list = []
-    for v in view_list:
-        df = pd.read_csv(os.path.join(data_folder, str(v)+"_featname.csv"), header=None)
-        featname_list.append(df.values.flatten())
-    feat_imp_list = []
-    for i in range(len(featname_list)):
-        feat_imp = {"feat_name":featname_list[i]}
-        feat_imp['imp'] = np.zeros(dim_list[i])
-    for j in range(dim_list[i]):
-        feat_tr = data_tr_list[i][:,j].clone()
-        feat_trte = data_trte_list[i][:,j].clone()
-        data_tr_list[i][:,j] = 0
-        data_trte_list[i][:,j] = 0
-        adj_tr_list, adj_te_list = gen_trte_adj_mat(data_tr_list, data_trte_list, trte_idx, adj_parameter)
-        te_prob = test_epoch(data_trte_list, adj_te_list, trte_idx["te"], model_dict)
-        if num_class == 2:
-           f1_tmp = f1_score(labels_trte[trte_idx["te"]], te_prob.argmax(1))
-        else:
-           f1_tmp = f1_score(labels_trte[trte_idx["te"]], te_prob.argmax(1), average='macro')
-        feat_imp['imp'][j] = (f1-f1_tmp)*dim_list[i]
-                
-        data_tr_list[i][:,j] = feat_tr.clone()
-        data_trte_list[i][:,j] = feat_trte.clone()bb
-    feat_imp_list.append(pd.DataFrame(data=feat_imp))
+            dim_list = [x.shape[1] for x in data_tr_list]
+            model_dict = init_model_dict(num_view, num_class, dim_list, dim_he_list, dim_hvcdn)
+            for m in model_dict:
+                if cuda:
+                    model_dict[m].cuda()
+            #model_dict = load_model_dict(model_folder, model_dict)
+            te_prob = test_epoch(data_trte_list, adj_te_list, trte_idx["te"], model_dict)
+            if num_class == 2:
+                f1 = f1_score(labels_trte[trte_idx["te"]], te_prob.argmax(1))
+            else:
+                f1 = f1_score(labels_trte[trte_idx["te"]], te_prob.argmax(1), average='macro')
+                   
+            
+            feat_imp_list = []
+            for i in range(len(featname_list)):
+                feat_imp = {"feat_name":featname_list[i]}
+                feat_imp['imp'] = np.zeros(dim_list[i])
+                for j in range(dim_list[i]):
+                    feat_tr = data_tr_list[i][:,j].clone()
+                    feat_trte = data_trte_list[i][:,j].clone()
+                    data_tr_list[i][:,j] = 0
+                    data_trte_list[i][:,j] = 0
+                    adj_tr_list, adj_te_list = gen_trte_adj_mat(data_tr_list, data_trte_list, trte_idx, adj_parameter)
+                    te_prob = test_epoch(data_trte_list, adj_te_list, trte_idx["te"], model_dict)
+                    if num_class == 2:
+                        f1_tmp = f1_score(labels_trte[trte_idx["te"]], te_prob.argmax(1))
+                    else:
+                        f1_tmp = f1_score(labels_trte[trte_idx["te"]], te_prob.argmax(1), average='macro')
+                    feat_imp['imp'][j] = (f1-f1_tmp)*dim_list[i]
+                    
+                    data_tr_list[i][:,j] = feat_tr.clone()
+                    data_trte_list[i][:,j] = feat_trte.clone()
+                feat_imp_list.append(pd.DataFrame(data=feat_imp))
+    
+featimp_list_list = []
+featimp_list_list.append(copy.deepcopy(feat_imp_list))
+#def summarize_imp_feat(featimp_list_list, topn=30):
+num_rep = len(featimp_list_list)
+num_view = len(featimp_list_list[0])
+df_tmp_list = []
+for v in range(num_view):
+    df_tmp = copy.deepcopy(featimp_list_list[0][v])
+    df_tmp['omics'] = np.ones(df_tmp.shape[0], dtype=int)*v
+    df_tmp_list.append(df_tmp.copy(deep=True))
+df_featimp = pd.concat(df_tmp_list).copy(deep=True)
+for r in range(1,num_rep):
+    for v in range(num_view):
+        df_tmp = copy.deepcopy(featimp_list_list[r][v])
+        df_tmp['omics'] = np.ones(df_tmp.shape[0], dtype=int)*v
+        df_featimp = df_featimp.append(df_tmp.copy(deep=True), ignore_index=True) 
+df_featimp_top = df_featimp.groupby(['feat_name', 'omics'])['imp'].sum()
+df_featimp_top = df_featimp_top.reset_index()
+df_featimp_top = df_featimp_top.sort_values(by='imp',ascending=False)
+df_featimp_top = df_featimp_top.iloc[:30]
+print('{:}\t{:}'.format('Rank','Feature name'))
+for i in range(len(df_featimp_top)):
+    print('{:}\t{:}'.format(i+1,df_featimp_top.iloc[i]['feat_name']))
         
 #####################################
 #           Performance             #
@@ -205,7 +247,7 @@ feat_imp=sns.barplot(data=df_featimp_top, x="imp", y="feat_name")
 fig = feat_imp.get_figure()
 fig.savefig('Feature_imp_MOGONET.png')
 
-df_featimp_top.to_csv("~/MOGONET/Featimp.csv")
+df_featimp_top.to_csv("/home/ldap/ltoure/MOGONET/Featimp.csv")
 
 
 hist_auc = sns.displot(all_auc)
@@ -246,8 +288,27 @@ for key in mean_perf.keys():
    mean_perf_out.write(key + " " + str(mean_perf[key]) + "\n")
 mean_perf_out.close() 
 
-# The end 
     
-         
+           
     
     
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
