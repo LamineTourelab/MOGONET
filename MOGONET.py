@@ -24,9 +24,9 @@ cuda = True if torch.cuda.is_available() else False
 #           Load Data               #
 #####################################
 
-rnaseq = pd.read_csv("path", sep=",", index_col=0)
-traitData = pd.read_csv("path", index_col=0)
-DataExome= pd.read_csv("path", sep=",", index_col=0)
+omics1 = pd.read_csv("path", sep=",", index_col=0)
+outcomes = pd.read_csv("path", index_col=0)
+omics2 = pd.read_csv("path", sep=",", index_col=0)
 TestIndex100 = pd.read_csv("path", sep=" ")
 
 #############################################
@@ -38,9 +38,9 @@ test_i = TestIndex100
 test_i = test_i - 1
 
 
-X= rnaseq
-y= DataExome
-labels=traitData
+X = omics1
+y = omics2
+labels = outcomes
 
 data_folder = 'ROSMAP'
 view_list = [1,2]
