@@ -5,9 +5,11 @@ import pandas as pd
 import torch
 
 from sklearn.metrics import f1_score
-#from utils import load_model_dict
-#from models import init_model_dict
-#from train_test import prepare_trte_data, gen_trte_adj_mat, test_epoch
+from utils import load_model_dict
+from models import init_model_dict
+from train_test import prepare_trte_data, gen_trte_adj_mat, test_epoch
+
+cuda = True if torch.cuda.is_available() else False
 
 cuda = True if torch.cuda.is_available() else False
 
@@ -63,8 +65,8 @@ def cal_feat_imp(data_folder, model_folder, view_list, num_class):
     return feat_imp_list
 
 
-featimp_list_list = []
-featimp_list_list.append(copy.deepcopy(feat_imp_list))
+    featimp_list_list = []
+    featimp_list_list.append(copy.deepcopy(feat_imp_list))
 def summarize_imp_feat(featimp_list_list, topn=30):
     num_rep = len(featimp_list_list)
     num_view = len(featimp_list_list[0])
