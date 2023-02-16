@@ -11,8 +11,6 @@ from train_test import prepare_trte_data, gen_trte_adj_mat, test_epoch
 
 cuda = True if torch.cuda.is_available() else False
 
-cuda = True if torch.cuda.is_available() else False
-
 def cal_feat_imp(data_folder, model_folder, view_list, num_class):
     num_view = len(view_list)
     dim_hvcdn = pow(num_class,num_view)
