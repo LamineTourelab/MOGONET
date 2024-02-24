@@ -8,3 +8,12 @@ MOGONET combines GCN for multi-omics-specific learning and VCDN for multi-omics 
 Here is the original [article](https://www.nature.com/articles/s41467-021-23774-w) et [github](https://github.com/txWang/MOGONET). 
 
 However, the model can be trained using only two types of omics instead of 3 or more, depending on your data.
+
+# Files 
+
+main_mogonet.py: Examples of MOGONET for classification tasks
+main_biomarker.py: Examples for identifying biomarkers
+models.py: MOGONET model
+train_test.py: Training and testing functions
+feat_importance.py: Feature importance functions
+utils.py: Supporting functions
