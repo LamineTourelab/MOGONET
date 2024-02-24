@@ -15,6 +15,6 @@ main_mogonet.py: Examples of MOGONET for classification tasks\
 MOGONET.py: How to create your data et save in to folder\
 main_biomarker.py: Examples for identifying biomarkers\
 models.py: MOGONET model\
-train_test.py: Training and testing functions
+train_test.py: Training and testing functions\
 feat_importance.py: Feature importance functions
 utils.py: Supporting functions
