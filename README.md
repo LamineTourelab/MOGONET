@@ -13,7 +13,7 @@ However, the model can be trained using only two types of omics instead of 3 or 
 
 main_mogonet.py: Examples of MOGONET for classification tasks
 
-MOGONET.py: How to create your data et save in to folder
+MOGONET.py: How to create your data et save in to folder \n
 main_biomarker.py: Examples for identifying biomarkers
 models.py: MOGONET model
 train_test.py: Training and testing functions
