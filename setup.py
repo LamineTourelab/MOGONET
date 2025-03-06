@@ -1,4 +1,6 @@
 from setuptools import setup, find_packages
+import re
+import os
 
 def get_version():
     with open(os.path.join("mogonet", "_version.py")) as f:
