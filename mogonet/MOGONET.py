@@ -10,9 +10,9 @@ import pandas as pd
 import numpy as np 
 import torch
 import torch.nn.functional as F
-from models import init_model_dict, init_optim
-from utils import one_hot_tensor, cal_sample_weight, gen_adj_mat_tensor, gen_test_adj_mat_tensor, cal_adj_mat_parameter
-from train_test import train_test, prepare_trte_data, train_epoch, test_epoch, gen_trte_adj_mat
+from .models import init_model_dict, init_optim
+from .utils import one_hot_tensor, cal_sample_weight, gen_adj_mat_tensor, gen_test_adj_mat_tensor, cal_adj_mat_parameter
+from .train_test import train_test, prepare_trte_data, train_epoch, test_epoch, gen_trte_adj_mat
 from sklearn.metrics import confusion_matrix, accuracy_score, balanced_accuracy_score, f1_score, precision_score, recall_score, roc_auc_score
 import seaborn as sns
 import copy
