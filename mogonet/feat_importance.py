@@ -5,9 +5,9 @@ import pandas as pd
 import torch
 
 from sklearn.metrics import f1_score
-from utils import load_model_dict
-from models import init_model_dict
-from train_test import prepare_trte_data, gen_trte_adj_mat, test_epoch
+from .utils import load_model_dict
+from .models import init_model_dict
+from .train_test import prepare_trte_data, gen_trte_adj_mat, test_epoch
 
 cuda = True if torch.cuda.is_available() else False
 
