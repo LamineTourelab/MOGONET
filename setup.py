@@ -1,8 +1,12 @@
 from setuptools import setup, find_packages
 
+def get_version():
+    with open(os.path.join("mogonet", "_version.py")) as f:
+        return re.search(r'__version__ = "(.*?)"', f.read()).group(1)
+
 setup(
     name="mogonet",  # Name of your package (must be unique on PyPI)
-    version="0.1.0",  # Version of your package
+    version=get_version(),  # Version of your package
     author="Lamine TOURE",
     author_email="laminetoure626@gmail.com",
     description="A Python package for MOGONET-related tasks.",
