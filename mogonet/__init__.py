@@ -13,4 +13,5 @@ __all__ = [
     "train_test",
     "cal_sample_weight",
     "one_hot_tensor",
+    "__version__",
 ]
