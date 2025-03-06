@@ -20,6 +20,8 @@ setup(
         "numpy>=1.20.0",
         "scikit-learn>=1.0",
         "pandas>=1.3.0",
+        "torch>=1.10.0",  
+        "seaborn>=0.11.0",  
     ],
     extras_require={  # Optional dependencies
         "dev": ["pytest", "flake8", "twine"],
