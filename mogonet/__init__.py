@@ -1,4 +1,3 @@
-from .MOGONET import MOGONET
 from .feat_importance import cal_feat_imp, summarize_imp_feat
 from .models import GCN_E, VCDN, Classifier_1
 from .train_test import train_test
