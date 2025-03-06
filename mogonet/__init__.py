@@ -4,7 +4,6 @@ from .train_test import train_test
 from .utils import cal_sample_weight, one_hot_tensor
 
 __all__ = [
-    "MOGONET",
     "cal_feat_imp",
     "summarize_imp_feat",
     "GCN_E",
@@ -14,3 +13,4 @@ __all__ = [
     "cal_sample_weight",
     "one_hot_tensor",
 ]
+__version__ = "0.1.0"  
