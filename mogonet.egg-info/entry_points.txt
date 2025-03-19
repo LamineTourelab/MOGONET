@@ -1,0 +1,3 @@
+[console_scripts]
+main-biomarker = mogonet.scripts.main_biomarker:main
+main-mogonet = mogonet.scripts.main_mogonet:main
