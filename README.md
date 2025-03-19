@@ -7,7 +7,7 @@ MOGONET integrates multi-omics data using graph convolutional networks
 MOGONET combines GCN for multi-omics-specific learning and VCDN for multi-omics integration. For clear and concise illustration, an example of one sample is chosen to demonstrate the VCDN component for multi-omics integration. Preprocessing is first performed on each omics data type to remove noise and redundant features. Each omics-specific GCN is trained to perform class prediction using omics features and the corresponding sample similarity network generated from the omics data. The cross-omics discovery tensor is calculated from the initial predictions of omics-specific GCNs and forwarded to VCDN for final prediction. MOGONET is an end-to-end model and all networks are trained jointly.
 Here is the original [MOGONET paper](https://www.nature.com/articles/s41467-021-23774-w) et [GitHub repository](https://github.com/txWang/MOGONET). 
 
-However, the model can be trained using only two types of omics instead of 3 or more, depending on your data.
+It provides tools for biomedical data classification and biomarker identification. MOGONET can handle binary and multi-class classification tasks, making it suitable for a wide range of applications in bioinformatics and computational biology.
 
 # Files 
 
