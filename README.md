@@ -11,10 +11,23 @@ However, the model can be trained using only two types of omics instead of 3 or 
 
 # Files 
 
-main_mogonet.py: Examples of MOGONET for classification tasks\
-MOGONET.py: How to create your data et save in to folder\
-main_biomarker.py: Examples for identifying biomarkers\
-models.py: MOGONET model\
-train_test.py: Training and testing functions\
-feat_importance.py: Feature importance functions\
-utils.py: Supporting functions
+mogonet/
+├── README.md                     # Project documentation
+├── MOGONET_tutorial_colab.ipynb # Jupyter notebook tutorial (Google colab)
+├── licence.md                    # License information
+├── requirements.txt              # List of dependencies
+├── setup.py                     # Configuration for packaging
+├── mogonet/                     # Main package directory
+│   ├── __init__.py              # Package initialization
+│   ├── _version.py              # Version information
+│   ├── feat_importance.py       # Feature importance functions
+│   ├── models.py                # Neural network models
+│   ├── train_test.py            # Training and testing functions
+│   └── utils.py                 # Utility functions
+├── scripts/                     # Example scripts
+│   ├── MOGONET.py               # Data preparation script
+│   ├── main_biomarker.py        # Biomarker identification example
+│   └── main_mogonet.py          # Classification example
+└── .github/                     # GitHub Actions configuration
+    └── workflows/
+        └── python-package.yml    # CI/CD workflow
