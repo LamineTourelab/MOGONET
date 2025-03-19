@@ -11,6 +11,7 @@ However, the model can be trained using only two types of omics instead of 3 or 
 
 # Files 
 
+```
 mogonet/
 ├── README.md                     # Project documentation
 ├── MOGONET_tutorial_colab.ipynb # Jupyter notebook tutorial (Google colab)
@@ -31,3 +32,4 @@ mogonet/
 └── .github/                     # GitHub Actions configuration
     └── workflows/
         └── python-package.yml    # CI/CD workflow
+```
