@@ -110,9 +110,15 @@ def train_test(data_folder, view_list, num_class,
     all_auc, all_acc, all_bacc, all_f1 = [], [], [], []
     all_precision, all_recall, all_se, all_sp = [], [], [], []
     
-    test_inverval = 10  # Réduction pour tester plus souvent
+    test_inverval = 50
     num_view = len(view_list)
-    dim_hvcdn = pow(num_class, num_view)
+    dim_hvcdn = pow(num_class,num_view)
+    if data_folder == 'ROSMAP':
+        adj_parameter = 2
+        dim_he_list = [200,200,100]
+    if data_folder == 'BRCA':
+        adj_parameter = 10
+        dim_he_list = [400,400,200]
 
     data_tr_list, data_trte_list, trte_idx, labels_trte = prepare_trte_data(data_folder, view_list)
     
