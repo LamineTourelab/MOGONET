@@ -10,7 +10,13 @@ from .utils import one_hot_tensor, cal_sample_weight, gen_adj_mat_tensor, gen_te
 
 cuda = True if torch.cuda.is_available() else False
 
-
+if data_folder == 'ROSMAP':
+        adj_parameter = 2
+        dim_he_list = [200,200,100]
+if data_folder == 'BRCA':
+    adj_parameter = 10
+    dim_he_list = [400,400,200]
+        
 def prepare_trte_data(data_folder, view_list):
     num_view = len(view_list)
     labels_tr = np.loadtxt(os.path.join(data_folder, "labels_tr.csv"), delimiter=',')
