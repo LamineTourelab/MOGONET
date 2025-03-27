@@ -107,17 +107,12 @@ def test_epoch(data_list, adj_list, te_idx, model_dict):
 def train_test(data_folder, view_list, num_class,
                lr_e_pretrain, lr_e, lr_c, 
                num_epoch_pretrain, num_epoch):
+    all_auc, all_acc, all_bacc, all_f1 = [], [], [], []
+    all_precision, all_recall, all_se, all_sp = [], [], [], []
     
-    test_inverval = 50
+    test_inverval = 10  # Réduction pour tester plus souvent
     num_view = len(view_list)
     dim_hvcdn = pow(num_class, num_view)
-
-    if data_folder == 'ROSMAP':
-        adj_parameter = 2
-        dim_he_list = [200, 200, 100]
-    elif data_folder == 'BRCA':
-        adj_parameter = 10
-        dim_he_list = [400, 400, 200]
 
     data_tr_list, data_trte_list, trte_idx, labels_trte = prepare_trte_data(data_folder, view_list)
     
@@ -147,56 +142,58 @@ def train_test(data_folder, view_list, num_class,
     print("\nTraining...")
     optim_dict = init_optim(num_view, model_dict, lr_e, lr_c)
 
-    all_metrics = []  # Stockage des métriques
-
-    for epoch in range(num_epoch + 1):
+    for epoch in range(num_epoch+1):
         train_epoch(data_tr_list, adj_tr_list, labels_tr_tensor, 
                     onehot_labels_tr_tensor, sample_weight_tr, model_dict, optim_dict)
-
+        
         if epoch % test_inverval == 0:
             te_prob = test_epoch(data_trte_list, adj_te_list, trte_idx["te"], model_dict)
+            print(f"\nTest: Epoch {epoch}, te_prob.shape: {te_prob.shape}")
+
+            if te_prob.size == 0:
+                print("⚠ Warning: te_prob is empty. Skipping evaluation.")
+                continue
+
             y_true = labels_trte[trte_idx["te"]]
             y_pred = te_prob.argmax(1)
 
-            print("\nTest: Epoch {:d}".format(epoch))
-            
+            print(f"Labels True: {y_true[:5]}")
+            print(f"Predicted: {y_pred[:5]}")
+
             if num_class == 2:
                 auc = roc_auc_score(y_true, te_prob[:, 1])
                 acc = accuracy_score(y_true, y_pred)
+                bacc = balanced_accuracy_score(y_true, y_pred)
                 f1 = f1_score(y_true, y_pred)
                 precision = precision_score(y_true, y_pred)
                 recall = recall_score(y_true, y_pred)
-                bal_acc = balanced_accuracy_score(y_true, y_pred)
-                sensitivity = recall  # Sensitivity = Recall pour une classification binaire
-                specificity = balanced_accuracy_score(y_true, y_pred) * 2 - recall
 
-                scores = {
-                    "Epoch": epoch,
-                    "AUC": auc,
-                    "Accuracy": acc,
-                    "BalAccuracy": bal_acc,
-                    "F1": f1,
-                    "Precision": precision,
-                    "Recall": recall,
-                    "Sensitivity": sensitivity,
-                    "Specificity": specificity
-                }
+                cm = confusion_matrix(y_true, y_pred)
+                print(f"Confusion Matrix:\n{cm}")
+
+                if cm.shape == (2,2):
+                    sensitivity = cm[0,0] / (cm[0,0] + cm[0,1])
+                    specificity = cm[1,1] / (cm[1,0] + cm[1,1])
+                else:
+                    sensitivity, specificity = 0, 0  # Erreur si mauvais format
+
+                all_auc.append(auc)
+                all_acc.append(acc)
+                all_bacc.append(bacc)
+                all_f1.append(f1)
+                all_precision.append(precision)
+                all_recall.append(recall)
+                all_se.append(sensitivity)
+                all_sp.append(specificity)
+
+                print(f"Epoch {epoch}: AUC={auc:.3f}, F1={f1:.3f}, Acc={acc:.3f}, BAcc={bacc:.3f}")
 
             else:
                 acc = accuracy_score(y_true, y_pred)
                 f1_weighted = f1_score(y_true, y_pred, average='weighted')
                 f1_macro = f1_score(y_true, y_pred, average='macro')
 
-                scores = {
-                    "Epoch": epoch,
-                    "Accuracy": acc,
-                    "F1_weighted": f1_weighted,
-                    "F1_macro": f1_macro
-                }
+                print(f"Epoch {epoch}: Accuracy={acc:.3f}, F1_weighted={f1_weighted:.3f}, F1_macro={f1_macro:.3f}")
 
-            print(scores)
-            all_metrics.append(scores)  # Ajout des scores à la liste
-
-    return all_metrics  # Retourne toutes les métriques
-            
+    return all_auc, all_acc, all_bacc, all_f1, all_precision, all_recall, all_se, all_sp
             
