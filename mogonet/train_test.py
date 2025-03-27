@@ -14,8 +14,8 @@ if data_folder == 'ROSMAP':
         adj_parameter = 2
         dim_he_list = [200,200,100]
 if data_folder == 'BRCA':
-    adj_parameter = 10
-    dim_he_list = [400,400,200]
+        adj_parameter = 10
+        dim_he_list = [400,400,200]
         
 def prepare_trte_data(data_folder, view_list):
     num_view = len(view_list)
