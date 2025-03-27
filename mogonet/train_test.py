@@ -2,11 +2,11 @@
 """
 import os
 import numpy as np
-from sklearn.metrics import accuracy_score, f1_score, roc_auc_score, precision_score, recall_score, balanced_accuracy_score
+from sklearn.metrics import accuracy_score, f1_score, roc_auc_score
 import torch
 import torch.nn.functional as F
-from .models import init_model_dict, init_optim
-from .utils import one_hot_tensor, cal_sample_weight, gen_adj_mat_tensor, gen_test_adj_mat_tensor, cal_adj_mat_parameter
+from models import init_model_dict, init_optim
+from utils import one_hot_tensor, cal_sample_weight, gen_adj_mat_tensor, gen_test_adj_mat_tensor, cal_adj_mat_parameter
 
 cuda = True if torch.cuda.is_available() else False
 
@@ -107,9 +107,6 @@ def test_epoch(data_list, adj_list, te_idx, model_dict):
 def train_test(data_folder, view_list, num_class,
                lr_e_pretrain, lr_e, lr_c, 
                num_epoch_pretrain, num_epoch):
-    all_auc, all_acc, all_bacc, all_f1 = [], [], [], []
-    all_precision, all_recall, all_se, all_sp = [], [], [], []
-    
     test_inverval = 50
     num_view = len(view_list)
     dim_hvcdn = pow(num_class,num_view)
@@ -119,87 +116,41 @@ def train_test(data_folder, view_list, num_class,
     if data_folder == 'BRCA':
         adj_parameter = 10
         dim_he_list = [400,400,200]
-
     data_tr_list, data_trte_list, trte_idx, labels_trte = prepare_trte_data(data_folder, view_list)
-    
     labels_tr_tensor = torch.LongTensor(labels_trte[trte_idx["tr"]])
     onehot_labels_tr_tensor = one_hot_tensor(labels_tr_tensor, num_class)
-    sample_weight_tr = torch.FloatTensor(cal_sample_weight(labels_trte[trte_idx["tr"]], num_class))
-    
+    sample_weight_tr = cal_sample_weight(labels_trte[trte_idx["tr"]], num_class)
+    sample_weight_tr = torch.FloatTensor(sample_weight_tr)
     if cuda:
         labels_tr_tensor = labels_tr_tensor.cuda()
         onehot_labels_tr_tensor = onehot_labels_tr_tensor.cuda()
         sample_weight_tr = sample_weight_tr.cuda()
-
     adj_tr_list, adj_te_list = gen_trte_adj_mat(data_tr_list, data_trte_list, trte_idx, adj_parameter)
     dim_list = [x.shape[1] for x in data_tr_list]
-
     model_dict = init_model_dict(num_view, num_class, dim_list, dim_he_list, dim_hvcdn)
     for m in model_dict:
         if cuda:
             model_dict[m].cuda()
-
+    
     print("\nPretrain GCNs...")
     optim_dict = init_optim(num_view, model_dict, lr_e_pretrain, lr_c)
     for epoch in range(num_epoch_pretrain):
         train_epoch(data_tr_list, adj_tr_list, labels_tr_tensor, 
                     onehot_labels_tr_tensor, sample_weight_tr, model_dict, optim_dict, train_VCDN=False)
-
     print("\nTraining...")
     optim_dict = init_optim(num_view, model_dict, lr_e, lr_c)
-
     for epoch in range(num_epoch+1):
         train_epoch(data_tr_list, adj_tr_list, labels_tr_tensor, 
                     onehot_labels_tr_tensor, sample_weight_tr, model_dict, optim_dict)
-        
         if epoch % test_inverval == 0:
             te_prob = test_epoch(data_trte_list, adj_te_list, trte_idx["te"], model_dict)
-            print(f"\nTest: Epoch {epoch}, te_prob.shape: {te_prob.shape}")
-
-            if te_prob.size == 0:
-                print("⚠ Warning: te_prob is empty. Skipping evaluation.")
-                continue
-
-            y_true = labels_trte[trte_idx["te"]]
-            y_pred = te_prob.argmax(1)
-
-            print(f"Labels True: {y_true[:5]}")
-            print(f"Predicted: {y_pred[:5]}")
-
+            print("\nTest: Epoch {:d}".format(epoch))
             if num_class == 2:
-                auc = roc_auc_score(y_true, te_prob[:, 1])
-                acc = accuracy_score(y_true, y_pred)
-                bacc = balanced_accuracy_score(y_true, y_pred)
-                f1 = f1_score(y_true, y_pred)
-                precision = precision_score(y_true, y_pred)
-                recall = recall_score(y_true, y_pred)
-
-                cm = confusion_matrix(y_true, y_pred)
-                print(f"Confusion Matrix:\n{cm}")
-
-                if cm.shape == (2,2):
-                    sensitivity = cm[0,0] / (cm[0,0] + cm[0,1])
-                    specificity = cm[1,1] / (cm[1,0] + cm[1,1])
-                else:
-                    sensitivity, specificity = 0, 0  # Erreur si mauvais format
-
-                all_auc.append(auc)
-                all_acc.append(acc)
-                all_bacc.append(bacc)
-                all_f1.append(f1)
-                all_precision.append(precision)
-                all_recall.append(recall)
-                all_se.append(sensitivity)
-                all_sp.append(specificity)
-
-                print(f"Epoch {epoch}: AUC={auc:.3f}, F1={f1:.3f}, Acc={acc:.3f}, BAcc={bacc:.3f}")
-
+                print("Test ACC: {:.3f}".format(accuracy_score(labels_trte[trte_idx["te"]], te_prob.argmax(1))))
+                print("Test F1: {:.3f}".format(f1_score(labels_trte[trte_idx["te"]], te_prob.argmax(1))))
+                print("Test AUC: {:.3f}".format(roc_auc_score(labels_trte[trte_idx["te"]], te_prob[:,1])))
             else:
-                acc = accuracy_score(y_true, y_pred)
-                f1_weighted = f1_score(y_true, y_pred, average='weighted')
-                f1_macro = f1_score(y_true, y_pred, average='macro')
-
-                print(f"Epoch {epoch}: Accuracy={acc:.3f}, F1_weighted={f1_weighted:.3f}, F1_macro={f1_macro:.3f}")
-
-    return all_auc, all_acc, all_bacc, all_f1, all_precision, all_recall, all_se, all_sp
-            
+                print("Test ACC: {:.3f}".format(accuracy_score(labels_trte[trte_idx["te"]], te_prob.argmax(1))))
+                print("Test F1 weighted: {:.3f}".format(f1_score(labels_trte[trte_idx["te"]], te_prob.argmax(1), average='weighted')))
+                print("Test F1 macro: {:.3f}".format(f1_score(labels_trte[trte_idx["te"]], te_prob.argmax(1), average='macro')))
+            print()
