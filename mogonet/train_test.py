@@ -112,10 +112,10 @@ def train_test(data_folder, view_list, num_class,
     dim_hvcdn = pow(num_class,num_view)
     if data_folder == 'ROSMAP':
         adj_parameter = 2
-        dim_he_list = [200, 200, 100]
-    elif data_folder == 'BRCA':
+        dim_he_list = [200,200,100]
+    if data_folder == 'BRCA':
         adj_parameter = 10
-        dim_he_list = [400, 400, 200]
+        dim_he_list = [400,400,200]
     data_tr_list, data_trte_list, trte_idx, labels_trte = prepare_trte_data(data_folder, view_list)
     labels_tr_tensor = torch.LongTensor(labels_trte[trte_idx["tr"]])
     onehot_labels_tr_tensor = one_hot_tensor(labels_tr_tensor, num_class)
@@ -149,6 +149,7 @@ def train_test(data_folder, view_list, num_class,
                 print("Test ACC: {:.3f}".format(accuracy_score(labels_trte[trte_idx["te"]], te_prob.argmax(1))))
                 print("Test F1: {:.3f}".format(f1_score(labels_trte[trte_idx["te"]], te_prob.argmax(1))))
                 print("Test AUC: {:.3f}".format(roc_auc_score(labels_trte[trte_idx["te"]], te_prob[:,1])))
+                
             else:
                 print("Test ACC: {:.3f}".format(accuracy_score(labels_trte[trte_idx["te"]], te_prob.argmax(1))))
                 print("Test F1 weighted: {:.3f}".format(f1_score(labels_trte[trte_idx["te"]], te_prob.argmax(1), average='weighted')))
