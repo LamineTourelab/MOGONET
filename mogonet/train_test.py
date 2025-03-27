@@ -111,7 +111,7 @@ def train_test(data_folder, view_list, num_class,
     num_view = len(view_list)
     dim_hvcdn = pow(num_class,num_view)
     if data_folder == 'ROSMAP':
-        adj_parameter = 2
+       adj_parameter = 2
         dim_he_list = [200,200,100]
     if data_folder == 'BRCA':
         adj_parameter = 10
